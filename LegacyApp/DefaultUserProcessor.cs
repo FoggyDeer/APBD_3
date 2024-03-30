@@ -6,7 +6,6 @@ public class DefaultUserProcessor : IUserProcessor
     public void ProcessUser(User user, ICreditLimitService creditService)
     {
         user.HasCreditLimit = true;
-        int creditLimit = creditService.GetCreditLimit(user.LastName, user.DateOfBirth);
-        user.CreditLimit = creditLimit;
+        user.CreditLimit = creditService.GetCreditLimit(user.LastName, user.DateOfBirth);
     }
 }

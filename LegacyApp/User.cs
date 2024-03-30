@@ -21,7 +21,7 @@ namespace LegacyApp
             LastName = lastName;
         }
 
-        public static bool ValidateData(string firstName, string lastName, string email, DateTime dateOfBirth)
+        public static bool ValidateUserData(string firstName, string lastName, string email, DateTime dateOfBirth)
         {
             if (IsFirstNameValid(firstName) || IsLastNameValid(lastName))
             {

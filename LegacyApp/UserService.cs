@@ -22,19 +22,17 @@ namespace LegacyApp
         
         public bool AddUser(string firstName, string lastName, string email, DateTime dateOfBirth, int clientId)
         {
-            if (!User.ValidateData(firstName, lastName, email, dateOfBirth))
+            if (!User.ValidateUserData(firstName, lastName, email, dateOfBirth))
                 return false;
 
             var client = _clientRepository.GetById(clientId);
             var user = new User(client, dateOfBirth, email, firstName, lastName);
 
-            List<IUserProcessor> processors = new List<IUserProcessor>
+            UserProcessor userProcessor = new UserProcessor(new List<IUserProcessor>
             {
                 new VeryImportantUserProcessor(),
                 new ImportantUserProcessor()
-            };
-            
-            UserProcessor userProcessor = new UserProcessor(processors);
+            });
             userProcessor.ProcessUser(user, _creditService);
 
             if (DoesUserHaveAcceptableCreditLimit(user))

@@ -6,7 +6,6 @@ public class ImportantUserProcessor : IUserProcessor
     public void ProcessUser(User user, ICreditLimitService creditService)
     {
         int creditLimit = creditService.GetCreditLimit(user.LastName, user.DateOfBirth);
-        creditLimit = creditLimit * 2;
-        user.CreditLimit = creditLimit;
+        user.CreditLimit = creditLimit * 2;
     }
 }
