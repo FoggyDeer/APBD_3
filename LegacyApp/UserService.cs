@@ -5,21 +5,20 @@ namespace LegacyApp
 {
     public class UserService
     {
-        private IClientRepository _clientRepository;
-        private ICreditLimitService _creditService;
+        private readonly IClientRepository _clientRepository;
+        private readonly ICreditLimitService _creditService;
 
         [Obsolete]
         public UserService() : this(new ClientRepository(), new UserCreditService())
         {
         }
         
-        public UserService(IClientRepository clientRepository,
-            ICreditLimitService creditService)
+        public UserService(IClientRepository clientRepository, ICreditLimitService creditService)
         {
             _clientRepository = clientRepository;
             _creditService = creditService;
         }
-        
+
         public bool AddUser(string firstName, string lastName, string email, DateTime dateOfBirth, int clientId)
         {
             if (!User.ValidateUserData(firstName, lastName, email, dateOfBirth))
