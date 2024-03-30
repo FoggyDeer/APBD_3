@@ -28,11 +28,10 @@ namespace LegacyApp
             var client = _clientRepository.GetById(clientId);
             var user = new User(client, dateOfBirth, email, firstName, lastName);
 
-            UserProcessor userProcessor = new UserProcessor(new List<IUserProcessor>
-            {
+            UserProcessor userProcessor = new UserProcessor([
                 new VeryImportantUserProcessor(),
                 new ImportantUserProcessor()
-            });
+            ]);
             userProcessor.ProcessUser(user, _creditService);
 
             if (DoesUserHaveAcceptableCreditLimit(user))
