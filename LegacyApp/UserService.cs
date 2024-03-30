@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace LegacyApp
 {
@@ -8,10 +9,8 @@ namespace LegacyApp
         private ICreditLimitService _creditService;
 
         [Obsolete]
-        public UserService()
+        public UserService() : this(new ClientRepository(), new UserCreditService())
         {
-            _clientRepository = new ClientRepository();
-            _creditService = new UserCreditService();
         }
         
         public UserService(IClientRepository clientRepository,
@@ -23,60 +22,33 @@ namespace LegacyApp
         
         public bool AddUser(string firstName, string lastName, string email, DateTime dateOfBirth, int clientId)
         {
-            if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
-            {
+            if (!User.ValidateData(firstName, lastName, email, dateOfBirth))
                 return false;
-            }
-
-            if (!email.Contains("@") && !email.Contains("."))
-            {
-                return false;
-            }
-
-            var now = DateTime.Now;
-            int age = now.Year - dateOfBirth.Year;
-            if (now.Month < dateOfBirth.Month || (now.Month == dateOfBirth.Month && now.Day < dateOfBirth.Day)) age--;
-
-            if (age < 21)
-            {
-                return false;
-            }
 
             var client = _clientRepository.GetById(clientId);
+            var user = new User(client, dateOfBirth, email, firstName, lastName);
 
-            var user = new User
+            List<IUserProcessor> processors = new List<IUserProcessor>
             {
-                Client = client,
-                DateOfBirth = dateOfBirth,
-                EmailAddress = email,
-                FirstName = firstName,
-                LastName = lastName
+                new VeryImportantUserProcessor(),
+                new ImportantUserProcessor()
             };
+            
+            UserProcessor userProcessor = new UserProcessor(processors);
+            userProcessor.ProcessUser(user, _creditService);
 
-            if (client.Type == "VeryImportantClient")
-            {
-                user.HasCreditLimit = false;
-            }
-            else if (client.Type == "ImportantClient")
-            {
-                int creditLimit = _creditService.GetCreditLimit(user.LastName, user.DateOfBirth);
-                creditLimit = creditLimit * 2;
-                user.CreditLimit = creditLimit;
-            }
-            else
-            {
-                user.HasCreditLimit = true;
-                int creditLimit = _creditService.GetCreditLimit(user.LastName, user.DateOfBirth);
-                user.CreditLimit = creditLimit;
-            }
-
-            if (user.HasCreditLimit && user.CreditLimit < 500)
+            if (DoesUserHaveAcceptableCreditLimit(user))
             {
                 return false;
             }
 
             UserDataAccess.AddUser(user);
             return true;
+        }
+
+        private static bool DoesUserHaveAcceptableCreditLimit(User user)
+        {
+            return user.HasCreditLimit && user.CreditLimit < 500;
         }
     }
 }
